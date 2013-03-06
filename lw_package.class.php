@@ -32,26 +32,27 @@ class lw_package extends lw_plugin
         $autoloader->setConfig($this->config);
     }
     
+    protected function executeControllerAction($package, $controller, $cmd)
+    {
+        $bootstrapClass = "\\".$this->params['package']."\\Controller\\Bootstrap";
+        if (class_exists($bootstrapClass, true)) {
+            $bootstrap = new $bootstrapClass();
+            $bootstrap->execute();
+        }
+        $ControllerClass = "\\".$this->params['package']."\\Controller\\".$this->params['Controller'];
+        $Controller = new $ControllerClass($cmd, $this->params['oid']);
+        return $Controller->execute();
+    }
+    
     public function buildPageOutput()
     {
-        /*
-        $controllerClass = "\\".$this->params['package']."\\Controller\\".$this->params['Controller']."Controller";
-        $controller = new $controllerClass();
-        $controller->setCommand($this->request->getAlnum("cmd"));
-        $controller->init();
-        $response = $controller->execute();
-        */ 
-        
         if ($this->request->getAlnum("cmd")) {
             $cmd = $this->request->getAlnum("cmd");
         }
         else {
             $cmd = $this->params['default'];
         }
-        
-        $actionClass = "\\".$this->params['package']."\\Controller\\".$this->params['Controller']."\\".$cmd;
-        $action = new $actionClass();
-        $response = $action->execute();
+        $response = $this->executeControllerAction($this->params['package'], $this->params['Controller'], $cmd);
         
         if ($response->getParameterByKey('reloadParent') == 1) {
             die('<script>parent.location.reload();</script>');
@@ -66,5 +67,5 @@ class lw_package extends lw_plugin
             }
             return $response->getOutputByKey('output');
         }        
-    }    
+    }
 }
