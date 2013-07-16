@@ -27,10 +27,12 @@ class PackageAutoloader
             $filename = str_replace('LWmvc', $path, $className);
         }
         else {
+            $className = str_replace("Factory", "", $className);
             $filename = $this->config['path']['package'].$className;
             //$filename = str_replace('FAB', $path.'/fab_module', $className);
         }
         $filename = str_replace('\\', '/', $filename).'.php';
+        
         if (is_file($filename)) {
             include_once($filename);
         }

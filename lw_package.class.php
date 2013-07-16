@@ -41,7 +41,12 @@ class lw_package extends lw_plugin
         }
         $ControllerClass = "\\".$this->params['package']."\\Controller\\".$this->params['Controller'];
         $Controller = new $ControllerClass($cmd, $this->params['oid']);
-        return $Controller->execute();
+        try {
+            return $Controller->execute();
+        }
+        catch (Exception $e) {
+            die($e->getMessage());
+        }
     }
     
     public function buildPageOutput()
@@ -58,8 +63,16 @@ class lw_package extends lw_plugin
             die('<script>parent.location.reload();</script>');
         }
         if ($response->getParameterByKey('cmd')) {
-            $url = lw_page::getInstance()->getUrl($response->getParameterArray());
+            if (intval($response->getParameterByKey('redirectIndex')) > 0 ) {
+                $url = lw_page::getInstance(intval($response->getParameterByKey('redirectIndex')))->getUrl($response->getParameterArray());
+            }
+            else {
+                $url = lw_page::getInstance()->getUrl($response->getParameterArray());
+            }
             $this->pageReload($url);
+        }
+        elseif(intval($response->getParameterByKey('redirectIndex')) > 0 ) {
+            $url = lw_page::getInstance(intval($response->getParameterByKey('redirectIndex')))->getUrl($response->getParameterArray());
         }
         else {
             if ($response->getParameterByKey('die') == 1){
